@@ -2,21 +2,21 @@
 
 ## Techstack
 
-Docker for automatic deployment
-Nextjs for frontend
-rabbitmq as message broker
-Debian 12 as server with mysql
+- Docker for automatic deployment
+- Nextjs for frontend
+- rabbitmq as message broker
+- Debian 12 as server with mysql
 
 ## Requirements
 
-As a User I should be able to browser a multitude of products
-As a User I should be able to purchase a chosen product
-As a User I should be able to buy a specific amount of a chosen product
-As a User I should be able to buy multiple products at once
-As a User I should be able to scan my “card”
-As a User I should be able to search up a product(s)
-As a User I should be able to use different type of filters for listed products
-As a User i should get a confirmation email on a completed purchase
+- As a User I should be able to browser a multitude of products
+- As a User I should be able to purchase a chosen product
+- As a User I should be able to buy a specific amount of a chosen product
+- As a User I should be able to buy multiple products at once
+- As a User I should be able to scan my “card”
+- As a User I should be able to search up a product(s)
+- As a User I should be able to use different type of filters for listed products
+- As a User i should get a confirmation email on a completed purchase
 
 ## Use case
 
