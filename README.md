@@ -1,4 +1,4 @@
-### Webshop
+### Webshop - PT Market
 
 ## Techstack
 
@@ -20,6 +20,6 @@
 
 ## Use case
 
-When I need a new table, a new phone, a cool car, I will be able to log in to (webshop name). Here I will be able to see a number of products. There will be the option to add x number of items to the cart.
+When I need a new table, a new phone, a cool car, I will be able to log in to PT Market. Here I will be able to see a number of products. There will be the option to add x number of items to the cart.
 
 When I am finished finding the products I want to buy, I should be able to pay with a debit or credit card.
