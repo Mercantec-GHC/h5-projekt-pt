@@ -1,0 +1,28 @@
+
+
+services:
+  website:
+    image: node
+    restart: unless-stopped
+    port:
+      - "8080:80"
+
+  db:
+    image: mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: example
+    volumes: 
+      - ./mysql:var/lib/mysql
+    port:
+      - "8080:80"
+
+  backend: 
+    image: node
+    restart: unless-stopped
+    depends_on: 
+      db: 
+        condition: service_healthy
+    environment:
+
+
