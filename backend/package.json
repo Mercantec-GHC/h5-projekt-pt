@@ -2,7 +2,7 @@
   "name": "backend",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "api.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -19,6 +19,7 @@
   },
   "dependencies": {
     "@prisma/adapter-mariadb": "^7.5.0",
-    "@prisma/client": "^7.5.0"
+    "@prisma/client": "^7.6.0",
+    "express": "^5.2.1"
   }
 }
