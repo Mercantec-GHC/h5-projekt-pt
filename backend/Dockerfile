@@ -1,4 +1,4 @@
-FROM node:19-alpine
+FROM node:alpine3.23
 
 COPY webshop backend
 
@@ -6,4 +6,4 @@ WORKDIR /backend/
 
 RUN npm install
 
-CMD ["npm", "run dev"]
+CMD ["npm", "run", "dev"]
