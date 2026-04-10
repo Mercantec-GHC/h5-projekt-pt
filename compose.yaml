@@ -5,26 +5,23 @@ services:
     build: ./frontend/webshop
     restart: unless-stopped
     depends_on:
-      db: 
+      backend:
         condition: service_healthy
-    #  backend:
-    #    condition: service_healthy
     ports:
       - "8080:3000"
     
 
-  db:
+  database:
     image: mysql
     restart: unless-stopped
-    environment:
-      MYSQL_ROOT_PASSWORD: secure_password
-      MYSQL_DATABASE: webshopdb
-      MYSQL_USER: myuser
-      MYSQL_PASSWORD: password
+    env_file:
+      - db.env
     volumes: 
       - ./db_data:/var/lib/mysql 
     ports:
       - 3306:3306
+    networks:
+      - network
     healthcheck:
       test: mysqladmin ping -h 127.0.0.1 -u $$MYSQL_USER --password=$$MYSQL_PASSWORD
       interval: 30s
@@ -35,18 +32,23 @@ services:
       
 
   backend: 
-    image: node
+    build: ./backend
     restart: unless-stopped
     depends_on: 
-      db: 
+      database: 
         condition: service_healthy
-  #  environment:
-  #  healthcheck:
-  #    test: []
-  #    interval: 30s
-  #    timeout: 10s
-  #    retries: 3
-  #    start_period: 10s
+    ports:
+      - "4000:3000"
+    env_file:
+      - backend.env
+    networks:
+      - network
+    healthcheck:
+      test: wget --no-verbose --tries=1 --spider http://localhost:3000
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
 
   messagebroker:
     image: rabbitmq:management
@@ -54,6 +56,10 @@ services:
       - "5672:5672"  # RabbitMQ port med amqp-protokol
       - "15672:15672"  # RabbitMQ management UI
       - "1883:1883"    # MQTT port
-    environment:
-      RABBITMQ_DEFAULT_USER: admin
-      RABBITMQ_DEFAULT_PASS: admin
+    env_file:
+      - "rabbitmq.env"
+
+
+networks:
+  network:
+    name: network

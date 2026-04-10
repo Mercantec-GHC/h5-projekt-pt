@@ -1,9 +1,15 @@
-FROM node:alpine3.23
+FROM node:24-slim
 
-COPY webshop backend
+RUN apt-get update -y && apt-get install -y openssl && apt-get install -y wget
 
-WORKDIR /backend/
+WORKDIR /backend
 
-RUN npm install
+COPY package.json package-lock.json ./
 
-CMD ["npm", "run", "dev"]
+RUN npm ci
+
+
+COPY . .
+
+
+CMD ["sh", "-c", "npm run db:deploy && npm run dev"]
