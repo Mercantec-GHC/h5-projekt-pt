@@ -31,3 +31,9 @@ When I am finished finding the products I want to buy, I should be able to pay w
 - [video1](https://www.youtube.com/watch?v=cFK87MJ96A8)
 - [video2](https://youtu.be/aIO6KdzITzU?si=xKEuIvxoSbHy9tDr)
 - [Guide with steps](https://www.instructables.com/Arduino-MFRC522-RFID-READER/)
+
+
+## Setup
+Remove .example from env files
+Run docker compose up --build -d
+All services should now be running and you should be able to find the webshop at localhost:8080

@@ -7,19 +7,135 @@ import { prisma } from './lib/prisma';
 const app = express();
 app.use(express.json());
 
-const createJWT = (data: any) => {
+const createKeys = () => {
   const { privateKey, publicKey } = nodeCrypto.generateKeyPairSync('rsa', {
     modulusLength: 2048,
   });
+};
+
+const createJWT = (data: any, privateKey: string) => {
   const token = jwt.sign(
     {
+      exp: Math.floor(Date.now() / 1000) + 60 * 60,
       data: data,
     },
-    publicKey,
-    { expiresIn: '2h' },
+    privateKey,
+    { algorithm: 'RS256' },
   );
 };
 const Auth = () => {};
+
+const dummyData = async () => {
+  await prisma.product.createMany({
+    data: [
+      {
+        name: 'alpha',
+        description: '',
+        price: 20,
+        amountAvailable: 99,
+        interactions: 230,
+      },
+      {
+        name: 'beta',
+        description: '',
+        price: 20,
+        amountAvailable: 99,
+        interactions: 230,
+      },
+      {
+        name: 'gamma',
+        description: '',
+        price: 20,
+        amountAvailable: 99,
+        interactions: 230,
+      },
+      {
+        name: 'zeta',
+        description: '',
+        price: 20,
+        amountAvailable: 99,
+        interactions: 230,
+      },
+      {
+        name: 'phi',
+        description: '',
+        price: 20,
+        amountAvailable: 99,
+        interactions: 230,
+      },
+      {
+        name: 'Lorem',
+        description: '',
+        price: 20,
+        amountAvailable: 99,
+        interactions: 230,
+      },
+      {
+        name: 'Ipsum',
+        description: '',
+        price: 20,
+        amountAvailable: 99,
+        interactions: 230,
+      },
+      {
+        name: 'dolor',
+        description: '',
+        price: 20,
+        amountAvailable: 99,
+        interactions: 230,
+      },
+      {
+        name: 'sit',
+        description: '',
+        price: 20,
+        amountAvailable: 99,
+        interactions: 230,
+      },
+      {
+        name: 'amet',
+        description: '',
+        price: 20,
+        amountAvailable: 99,
+        interactions: 230,
+      },
+      {
+        name: 'uno',
+        description: '',
+        price: 20,
+        amountAvailable: 99,
+        interactions: 230,
+      },
+      {
+        name: 'dos',
+        description: '',
+        price: 20,
+        amountAvailable: 99,
+        interactions: 230,
+      },
+      {
+        name: 'tres',
+        description: '',
+        price: 20,
+        amountAvailable: 99,
+        interactions: 230,
+      },
+      {
+        name: 'cuatro',
+        description: '',
+        price: 20,
+        amountAvailable: 99,
+        interactions: 230,
+      },
+      {
+        name: 'cinco',
+        description: '',
+        price: 20,
+        amountAvailable: 99,
+        interactions: 230,
+      },
+    ],
+  });
+};
 
 //Create User
 app.post('/createUser', async (req: any, res: any) => {
@@ -68,12 +184,15 @@ app.post('/login', async (req: any, res: any) => {
 });
 
 // Delete user
-
-app.get('/getProducts', async (req: any, res: any) => {
-  res.status(200).json('test');
-  let products = await prisma.product.findMany();
+app.get('/addProducts', async (req: any, res: any) => {
+  await dummyData();
+  res.status(200).json('products added');
 });
 
+app.get('/getProducts', async (req: any, res: any) => {
+  let products = await prisma.product.findMany();
+  res.status(200).json(products);
+});
 
 const PORT = 3000;
 app.listen(PORT, () => {
