@@ -27,3 +27,8 @@ model Product {
   amountAvailable Int
   interactions Int
 } 
+
+model Sessions {
+  userId Int
+  sessionId Int @id
+}

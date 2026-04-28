@@ -1,11 +1,14 @@
-import nodeCrypto from 'node:crypto';
+import nodeCrypto, { KeyObject } from 'node:crypto';
 import express from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import cors from 'cors';
 import { prisma } from './lib/prisma';
 
 const app = express();
 app.use(express.json());
+app.use(cors());
+app.use(express.urlencoded({ extended: true }));
 
 const createKeys = () => {
   const { privateKey, publicKey } = nodeCrypto.generateKeyPairSync('rsa', {
@@ -14,7 +17,7 @@ const createKeys = () => {
   return { privateKey, publicKey };
 };
 const { privateKey, publicKey } = createKeys();
-const createJWT = (data: any, privateKey: string) => {
+const createJWT = (data: any, privateKey: KeyObject) => {
   const token = jwt.sign(
     {
       exp: Math.floor(Date.now() / 1000) + 60 * 60,
@@ -23,8 +26,8 @@ const createJWT = (data: any, privateKey: string) => {
     privateKey,
     { algorithm: 'RS256' },
   );
+  return token;
 };
-const Auth = () => {};
 
 const dummyData = async () => {
   await prisma.product.createMany({
@@ -181,12 +184,21 @@ app.post('/login', async (req: any, res: any) => {
     return res.status(400).json('Incorrect password.');
   }
 
+  const token = createJWT(req, privateKey);
+  console.log(token);
+  res.cookie('session', token);
   res.status(200).json('Success');
 });
 
 // Auth
 app.post('/auth', async (req: any, res: any) => {
   //needs to check cookie that is sent in post using the rsa key
+  const token = req.headers['cookie']?.split('JWT=')[1];
+  jwt.verify(token, publicKey, (err: any) => {
+    if (err) {
+      res.status(400).json('Unauthorized');
+    }
+  });
 });
 
 app.get('/addProducts', async (req: any, res: any) => {
