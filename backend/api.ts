@@ -7,7 +7,12 @@ import { prisma } from './lib/prisma';
 
 const app = express();
 app.use(express.json());
-app.use(cors());
+app.use(
+  cors({
+    origin: 'http://localhost:8080',
+    credentials: true,
+  }),
+);
 app.use(express.urlencoded({ extended: true }));
 
 const createKeys = () => {
@@ -17,11 +22,11 @@ const createKeys = () => {
   return { privateKey, publicKey };
 };
 const { privateKey, publicKey } = createKeys();
-const createJWT = (data: any, privateKey: KeyObject) => {
+const createJWT = (input: any, privateKey: KeyObject) => {
   const token = jwt.sign(
     {
       exp: Math.floor(Date.now() / 1000) + 60 * 60,
-      data: data,
+      data: input,
     },
     privateKey,
     { algorithm: 'RS256' },
@@ -183,17 +188,16 @@ app.post('/login', async (req: any, res: any) => {
   if (!bcrypt.compareSync(req.body.password, user.password)) {
     return res.status(400).json('Incorrect password.');
   }
-
-  const token = createJWT(req, privateKey);
+  const token = createJWT(req.body.username, privateKey);
   console.log(token);
-  res.cookie('session', token);
-  res.status(200).json('Success');
+
+  res.status(200).cookie('session', token).json('Success');
 });
 
 // Auth
 app.post('/auth', async (req: any, res: any) => {
   //needs to check cookie that is sent in post using the rsa key
-  const token = req.headers['cookie']?.split('JWT=')[1];
+  const token = req.headers['cookie']?.split('session=')[1];
   jwt.verify(token, publicKey, (err: any) => {
     if (err) {
       res.status(400).json('Unauthorized');
