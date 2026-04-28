@@ -11,8 +11,9 @@ const createKeys = () => {
   const { privateKey, publicKey } = nodeCrypto.generateKeyPairSync('rsa', {
     modulusLength: 2048,
   });
+  return { privateKey, publicKey };
 };
-
+const { privateKey, publicKey } = createKeys();
 const createJWT = (data: any, privateKey: string) => {
   const token = jwt.sign(
     {
@@ -183,7 +184,11 @@ app.post('/login', async (req: any, res: any) => {
   res.status(200).json('Success');
 });
 
-// Delete user
+// Auth
+app.post('/auth', async (req: any, res: any) => {
+  //needs to check cookie that is sent in post using the rsa key
+});
+
 app.get('/addProducts', async (req: any, res: any) => {
   await dummyData();
   res.status(200).json('products added');
