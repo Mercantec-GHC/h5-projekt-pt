@@ -21,15 +21,17 @@ const createKeys = () => {
   });
   return { privateKey, publicKey };
 };
+
 const { privateKey, publicKey } = createKeys();
-const createJWT = (input: any, privateKey: KeyObject) => {
+
+const createJWT = (user: string, id: number, session: number, privateKey: KeyObject) => {
   const token = jwt.sign(
     {
-      exp: Math.floor(Date.now() / 1000) + 60 * 60,
-      data: input,
+      
+      data: {user, id, session},
     },
     privateKey,
-    { algorithm: 'RS256' },
+    { algorithm: 'RS256', expiresIn: '2h', },
   );
   return token;
 };
@@ -188,16 +190,46 @@ app.post('/login', async (req: any, res: any) => {
   if (!bcrypt.compareSync(req.body.password, user.password)) {
     return res.status(400).json('Incorrect password.');
   }
-  const token = createJWT(req.body.username, privateKey);
-  console.log(token);
-
+  let sessionId = Math.floor(Math.random() * 1000000000)
+  
+  prisma.sessions.create({data: {
+    sessionId: sessionId,
+    userId: user.id
+  }})
+  const token = createJWT(user.name, user.id, sessionId, privateKey);
+  console.log(token)
   res.status(200).cookie('session', token).json('Success');
 });
+
+// app.post('/findUser', async(req:any, res:any)=> {
+//   if (!req.body.id) {
+//     res.status(400).json("Invalid user")
+//   }
+//   else {
+//   let user = prisma.user.findFirst({where: {
+//       id: req.body.id 
+//     },
+//   select: {
+//     name: true
+//     e
+
+//   }})
+//     res.status(200).json(user)
+//   }
+// });
+
+app.post('/logout', async(req:any, res:any)=> {
+  const token = req.body.token;
+  prisma.sessions.delete({
+    where: {sessionId: token}
+  })
+});
+
 
 // Auth
 app.post('/auth', async (req: any, res: any) => {
   //needs to check cookie that is sent in post using the rsa key
-  const token = req.headers['cookie']?.split('session=')[1];
+  const token = req.headers['session']
   jwt.verify(token, publicKey, (err: any) => {
     if (err) {
       res.status(400).json('Unauthorized');

@@ -53,14 +53,14 @@ services:
       retries: 3
       start_period: 10s
 
-  messagebroker:
-    image: rabbitmq:management
-    ports:
-      - "5672:5672"  # RabbitMQ port med amqp-protokol
-      - "15672:15672"  # RabbitMQ management UI
-      - "1883:1883"    # MQTT port
-    env_file:
-      - "rabbitmq.env"
+#  messagebroker:
+#    image: rabbitmq:management
+#    ports:
+#      - "5672:5672"  # RabbitMQ port med amqp-protokol
+#      - "15672:15672"  # RabbitMQ management UI
+#      - "1883:1883"    # MQTT port
+#    env_file:
+#      - "rabbitmq.env"
 
 
 networks:
