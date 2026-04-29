@@ -3,13 +3,18 @@
 import Image from "next/image";
 import Link from "next/link";
 import Cookies from "universal-cookie";
+import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
 import { useCart } from "../../components/cart-context";
 
 // Dummy specs
 const specs = ["lorem ipsum dolor sit amet", "consectetur adipiscing elit", "sed do eiusmod tempor incididunt ut labore et dolore magna aliqua", "ut enim ad minim veniam", "quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat"];
 
-export default function Iphone17ProMax2TBPage() {
+export default function ProductPage() {
+    const { items } = useParams();
     const { addItem } = useCart();
+    const [product, setProduct] = useState<any>(null);
+    const [loading, setLoading] = useState(true);
 
     const cookies = new Cookies();
 
@@ -35,14 +40,46 @@ export default function Iphone17ProMax2TBPage() {
             return;
         } else {
             addItem({
-                id: 999,
-                name: "iPhone 17 Pro Max | 2TB",
-                price: "17.999 kr.-",
-                image: "/iPhone_17_Pro_Max.jpg",
+                id: product.id,
+                name: product.name,
+                price: product.price + " kr.-",
+                image: "/placeholder.jpg",
             });
             showToast("Item added to cart!", "#06be06");
         }
     }
+
+    useEffect(() => {
+        const fetchProduct = async () => {
+            try {
+                const res = await fetch("http://localhost:4000/getProducts");
+                const products = await res.json();
+
+                const found = products.find((p: { id: any; name: any }) => `${p.id}-${p.name}`.toLowerCase().trim().replace(/\s+/g, "-") === items);
+
+                setProduct(found || null);
+            } catch {
+                setProduct(null);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchProduct();
+    }, [items]);
+
+    if (loading)
+        return (
+            <div className="min-h-screen text-center py-16 text-black" style={{ backgroundColor: "#E9E6E6" }}>
+                Loading...
+            </div>
+        );
+    if (!product)
+        return (
+            <div className="min-h-screen text-center py-16 text-black" style={{ backgroundColor: "#E9E6E6" }}>
+                Product not found
+            </div>
+        );
 
     return (
         <main className="min-h-screen px-4 py-8 md:px-8" style={{ backgroundColor: "#E9E6E6" }}>
@@ -50,23 +87,23 @@ export default function Iphone17ProMax2TBPage() {
                 <div className="grid gap-8 md:grid-cols-2">
                     <section className="flex flex-col gap-5">
                         <div className="flex h-64 items-center justify-center rounded bg-neutral-300 p-4 md:h-80">
-                            <Image src="/iPhone_17_Pro_Max.jpg" alt="iPhone 17 Pro Max 2TB" width={480} height={480} className="max-h-full w-auto object-contain rounded-3xl" priority />
+                            <Image src="/placeholder.jpg" alt="iPhone 17 Pro Max 2TB" width={480} height={480} className="max-h-full w-auto object-contain rounded-3xl" priority />
                         </div>
 
                         <div className="grid grid-cols-3 gap-4">
                             <div className="flex h-14 items-center justify-center rounded bg-neutral-300 p-2">
-                                <Image src="/iPhone_17_Pro_Max.jpg" alt="Front view" width={90} height={60} className="h-full w-auto object-contain" />
+                                <Image src="/placeholder.jpg" alt="Back view" width={90} height={60} className="h-full w-auto object-contain" />
                             </div>
                             <div className="flex h-14 items-center justify-center rounded bg-neutral-300 p-2">
-                                <Image src="/iPhone_17_Pro_Max.jpg" alt="Back view" width={90} height={60} className="h-full w-auto object-contain" />
+                                <Image src="/placeholder.jpg" alt="Front view" width={90} height={60} className="h-full w-auto object-contain" />
                             </div>
                             <div className="flex h-14 items-center justify-center rounded bg-neutral-300 p-2">
-                                <Image src="/iPhone_17_Pro_Max.jpg" alt="Side view" width={90} height={60} className="h-full w-auto object-contain" />
+                                <Image src="/placeholder.jpg" alt="Side view" width={90} height={60} className="h-full w-auto object-contain" />
                             </div>
                         </div>
 
                         <div className="pt-2">
-                            <button type="button" onClick={() => handleAddToCart()} className="rounded-full bg-neutral-300 px-12 py-3 text-3 font-semibold text-black transition hover:bg-neutral-500">
+                            <button onClick={() => handleAddToCart()} className="rounded-full bg-neutral-300 px-12 py-3 text-3 font-semibold text-black transition hover:bg-neutral-500">
                                 Add to cart
                             </button>
                         </div>
@@ -74,12 +111,12 @@ export default function Iphone17ProMax2TBPage() {
 
                     <section className="flex flex-col gap-5 text-black">
                         <div>
-                            <h1 className="text-3xl font-bold">iPhone 17 Pro Max | 2TB</h1>
-                            <p className="mt-2 text-2xl">17.999 kr.-</p>
-                            <p className="text-lg font-medium">10 in stock</p>
+                            <h1 className="text-3xl font-bold">{product.name}</h1>
+                            <p className="mt-2 text-2xl">{product.price} kr.-</p>
+                            <p className="text-lg font-medium">{product.amountAvailable} in stock</p>
                         </div>
 
-                        <p className="max-w-xl text-lg leading-relaxed">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ex consequatur libero eum aut cum at eius quae esse ipsam, repellat consectetur maiores molestias similique perferendis, voluptates dolorum! Repudiandae, veritatis exercitationem?</p>
+                        <p className="max-w-xl text-lg leading-relaxed">{product.description || "No description available."}</p>
 
                         <details className="mt-2 rounded bg-neutral-300 text-black" open>
                             <summary className="cursor-pointer list-none px-5 py-3 text-center text-2xl font-medium">

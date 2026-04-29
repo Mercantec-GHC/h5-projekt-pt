@@ -7,7 +7,7 @@ import { faEnvelope } from "@fortawesome/free-solid-svg-icons";
 import { faLock } from "@fortawesome/free-solid-svg-icons/faLock";
 
 export default function Home() {
-
+    
     // Show a toast notification
     function showToast(message: any, color: any) {
         const toast = document.getElementById("toast");
@@ -22,7 +22,6 @@ export default function Home() {
             toast.classList.remove("show");
         }, 3000);
     }
-
 
     // Handle form submission
     const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -61,6 +60,35 @@ export default function Home() {
 
             if (response.ok) {
                 showToast(message || "Success", "#06be06");
+
+                fetch("http://localhost:4000/login", {
+                    method: "POST",
+                    credentials: "include",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: bodyJSON,
+                })
+                    .then((loginResponse) => {
+                        if (loginResponse.ok) {
+                            return loginResponse.text().then((loginMessage) => {
+                                if (typeof loginMessage === "string") {
+                                    loginMessage = loginMessage.replace(/"/g, "").trim();
+                                }
+                                showToast(loginMessage || "Logged in successfully.", "#06be06");
+                                setTimeout(() => {
+                                    window.location.href = "/";
+                                }, 1500);
+                            });
+                        } else {
+                            return loginResponse.text().then((loginMessage) => {
+                                if (typeof loginMessage === "string") {
+                                    loginMessage = loginMessage.replace(/"/g, "").trim();
+                                }
+                                showToast(loginMessage || "Login failed after registration.", "#ff0000");
+                            });
+                        }
+                    });
                 return;
             }
 

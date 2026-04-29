@@ -6,6 +6,7 @@ import { faUser } from "@fortawesome/free-solid-svg-icons/faUser";
 import { faLock } from "@fortawesome/free-solid-svg-icons/faLock";
 
 export default function Home() {
+    
     // Show a toast notification
     function showToast(message: any, color: any) {
         const toast = document.getElementById("toast");
@@ -36,6 +37,7 @@ export default function Home() {
         try {
             const response = await fetch("http://localhost:4000/login", {
                 method: "POST",
+                credentials: "include",
                 headers: {
                     "Content-Type": "application/json",
                 },

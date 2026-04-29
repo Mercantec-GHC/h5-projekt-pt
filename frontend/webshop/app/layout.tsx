@@ -4,6 +4,8 @@ import "@fortawesome/fontawesome-svg-core/styles.css";
 import { config } from "@fortawesome/fontawesome-svg-core";
 import "./globals.css";
 import Navbar from "./components/navbar";
+import { CartProvider } from "./components/cart-context";
+import CartSidebar from "./components/cart-sidebar";
 
 config.autoAddCss = false;
 
@@ -30,8 +32,11 @@ export default function RootLayout({
     return (
         <html lang="en" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
             <body className="min-h-full flex flex-col">
-                <Navbar />
-                {children}
+                <CartProvider>
+                    <Navbar />
+                    {children}
+                    <CartSidebar />
+                </CartProvider>
             </body>
         </html>
     );
