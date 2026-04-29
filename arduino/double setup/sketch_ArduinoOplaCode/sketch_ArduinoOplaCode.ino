@@ -8,12 +8,12 @@
 MKRIoTCarrier carrier;
 
 // MQTT settings
-const char* mqtt_server = "10.133.51.124";
+const char* mqtt_server = "231bdedf95bd46d4a1651323d0b91949.s1.eu.hivemq.cloud";
 const char* topic = "OLC-Data";
 const char* mqtt_username = "admin";
-const char* mqtt_password = "admin";
+const char* mqtt_password = "PhamiErSej1";
 
-WiFiClient wifiClient;
+WiFiSSLClient wifiClient;
 PubSubClient client(wifiClient);
 
 // NTP client for timestamp
@@ -37,7 +37,7 @@ void setup() {
   Serial.println("WiFi connected!");
 
   // Connect MQTT broker
-  client.setServer(mqtt_server, 1883);
+  client.setServer(mqtt_server, 8883);
   while (!client.connected()) {
     if (client.connect("ArduinoClient", mqtt_username, mqtt_password)) {
       Serial.println("Connected to MQTT broker!");
@@ -68,6 +68,7 @@ void loop() {
     String nfcData = Serial1.readStringUntil('\n');
     nfcData.trim();  // Remove whitespace/newlines
 
+    // Print received data
     Serial.print("Received: ");
     Serial.println(nfcData);
 

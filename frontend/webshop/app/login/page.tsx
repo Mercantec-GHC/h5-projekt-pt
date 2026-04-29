@@ -6,11 +6,24 @@ import { faUser } from "@fortawesome/free-solid-svg-icons/faUser";
 import { faLock } from "@fortawesome/free-solid-svg-icons/faLock";
 
 export default function Home() {
-const [popup, setPopup] = useState<{ type: "success" | "error"; message: string } | null>(null);
+    // Show a toast notification
+    function showToast(message: any, color: any) {
+        const toast = document.getElementById("toast");
+        if (!toast) return;
 
+        toast.textContent = String(message);
+
+        toast.classList.add("show");
+        toast.style.backgroundColor = color || "";
+
+        setTimeout(() => {
+            toast.classList.remove("show");
+        }, 3000);
+    }
+
+    // Handle form submission
     const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-        setPopup(null);
 
         let username = (document.getElementById("username") as HTMLInputElement)?.value || "";
         let password = (document.getElementById("password") as HTMLInputElement)?.value || "";
@@ -23,26 +36,27 @@ const [popup, setPopup] = useState<{ type: "success" | "error"; message: string 
         try {
             const response = await fetch("http://localhost:4000/login", {
                 method: "POST",
-                credentials: 'include',
                 headers: {
                     "Content-Type": "application/json",
                 },
                 body: bodyJSON,
             });
 
-            const message = await response.text();
+            let message = await response.text();
+
+            if (typeof message === "string") {
+                message = message.replace(/"/g, "").trim();
+            }
 
             if (response.ok) {
-                setPopup({ type: "success", message: message || "Success" });
+                showToast(message || "Success", "#06be06");
+                window.location.href = "/";
                 return;
             }
 
-            setPopup({ type: "error", message: message || "Something went wrong." });
+            showToast(message || "Something went wrong.", "#ff0000");
         } catch (error) {
-            setPopup({
-                type: "error",
-                message: error instanceof Error ? error.message : "Request failed.",
-            });
+            showToast(error instanceof Error ? error.message : "Request failed.", "#ff0000");
         }
     };
 
@@ -61,17 +75,6 @@ const [popup, setPopup] = useState<{ type: "success" | "error"; message: string 
                             <FontAwesomeIcon icon={faLock} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-white/80" />
                             <input type="password" name="password" placeholder="Password" id="password" required className="rounded-lg h-10 w-full border border-transparent pl-10 focus:outline-none focus:border-[#8FA7FF]" style={{ backgroundColor: "#4965D4" }} />
                         </div>
-                        {popup ? (
-                            <p
-                                className={`-mt-6 mb-4 text-sm font-semibold rounded-lg px-4 py-2 ${
-                                    popup.type === "success"
-                                        ? "bg-green-500/20 text-green-100 border border-green-300/30"
-                                        : "bg-red-500/20 text-red-100 border border-red-300/30"
-                                }`}
-                            >
-                                {popup.message}
-                            </p>
-                        ) : null}
                         <br />
                         <button type="submit" className="px-8 py-2 mt-5 mb-10 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-400">
                             Login
@@ -85,6 +88,7 @@ const [popup, setPopup] = useState<{ type: "success" | "error"; message: string 
                         </p>
                     </form>
                 </div>
+                <div id="toast" className="toast-default"></div>
             </main>
         </div>
     );

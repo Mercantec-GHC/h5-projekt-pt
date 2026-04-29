@@ -22,17 +22,24 @@ bool isReaderConnected() {
 SoftwareSerial mySerial(3, 2);  // RX, TX
 
 void setup() {
-  Serial.begin(9600);    // Debug
-  mySerial.begin(9600);  // To Opla
+  // Debug
+  Serial.begin(9600);
+
+  // To Opla
+  mySerial.begin(9600);
+  
   Serial.println("RC522 starting...");
 
+  // Init SPI bus - enables SCK, MOSI, and SS pins
   SPI.begin();
+
+  // Init RC522 - initializes NFC chip
   rfid.PCD_Init();
 
+  // Print connection status
   rfid.PCD_DumpVersionToSerial();
 
   readerOnline = isReaderConnected();
-
   if (!readerOnline) {
     Serial.println("ERROR: RC522 NOT DETECTED.");
   } else {
@@ -42,7 +49,7 @@ void setup() {
 
 void loop() {
 
-  // Check reader every 3 sec
+  // Print connection status
   if (millis() - lastReaderCheckMs >= READER_CHECK_INTERVAL_MS) {
     lastReaderCheckMs = millis();
 
@@ -74,9 +81,13 @@ void loop() {
     uid += String(rfid.uid.uidByte[i], HEX);
   }
 
-  Serial.println(uid);    // Debug to PC
-  mySerial.println(uid);  // Send to Opla
+  // Debug to PC
+  Serial.println(uid);   
 
+  // Send to Opla
+  mySerial.println(uid);
+
+  // Stops encryption
   rfid.PICC_HaltA();
   rfid.PCD_StopCrypto1();
 }

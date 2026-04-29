@@ -1,8 +1,46 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import Dropdown from "./components/dropdown";
+import Cookies from "universal-cookie";
+import { useEffect } from "react";
 
 export default function Home() {
+    const cookies = new Cookies();
+    function checkToken() {
+        console.log(cookies.get("session"));
+    }
+
+    useEffect(() => {
+        checkToken();
+
+        if (cookies) {
+            let decodedToken: any = null;
+            try {
+                const token = cookies.get("session");
+                if (token) {
+                    const payload = token.split(".")[1];
+                    decodedToken = JSON.parse(atob(payload));
+                }
+            } catch (error) {
+                console.error("Failed to decode token:", error);
+            }
+
+            let loginBtn = document.getElementById("login-button");
+
+            if (decodedToken) {
+                loginBtn!.textContent = decodedToken.data.user;
+                loginBtn!.onclick = () => {
+                    cookies.remove("session", { path: "/" });
+                    window.location.reload();
+                };
+            } else {
+                loginBtn!.textContent = "Guest";
+            }
+        }
+    }, []);
+
     return (
         <div className="min-h-screen" style={{ backgroundColor: "#E9E6E6" }}>
             <main>
