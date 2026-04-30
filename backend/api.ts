@@ -4,6 +4,7 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import cors from 'cors';
 import { prisma } from './lib/prisma';
+import type { Prisma__ProductClient } from './generated/prisma/models';
 
 const app = express();
 app.use(express.json());
@@ -24,14 +25,18 @@ const createKeys = () => {
 
 const { privateKey, publicKey } = createKeys();
 
-const createJWT = (user: string, id: number, session: number, privateKey: KeyObject) => {
+const createJWT = (
+  user: string,
+  id: number,
+  session: number,
+  privateKey: KeyObject,
+) => {
   const token = jwt.sign(
     {
-      
-      data: {user, id, session},
+      data: { user, id, session },
     },
     privateKey,
-    { algorithm: 'RS256', expiresIn: '2h', },
+    { algorithm: 'RS256', expiresIn: '2h' },
   );
   return token;
 };
@@ -190,14 +195,16 @@ app.post('/login', async (req: any, res: any) => {
   if (!bcrypt.compareSync(req.body.password, user.password)) {
     return res.status(400).json('Incorrect password.');
   }
-  let sessionId = Math.floor(Math.random() * 1000000000)
-  
-  prisma.sessions.create({data: {
-    sessionId: sessionId,
-    userId: user.id
-  }})
+  let sessionId = Math.floor(Math.random() * 1000000000);
+
+  let result = await prisma.sessions.create({
+    data: {
+      sessionId: sessionId,
+      userId: user.id,
+      createdAt: Math.floor(Date.now() / (1000 * 60 * 60)),
+    },
+  });
   const token = createJWT(user.name, user.id, sessionId, privateKey);
-  console.log(token)
   res.status(200).cookie('session', token).json('Success');
 });
 
@@ -207,7 +214,7 @@ app.post('/login', async (req: any, res: any) => {
 //   }
 //   else {
 //   let user = prisma.user.findFirst({where: {
-//       id: req.body.id 
+//       id: req.body.id
 //     },
 //   select: {
 //     name: true
@@ -218,21 +225,70 @@ app.post('/login', async (req: any, res: any) => {
 //   }
 // });
 
-app.post('/logout', async(req:any, res:any)=> {
-  const token = req.body.token;
-  prisma.sessions.delete({
-    where: {sessionId: token}
-  })
-});
-
-
-// Auth
-app.post('/auth', async (req: any, res: any) => {
-  //needs to check cookie that is sent in post using the rsa key
-  const token = req.headers['session']
-  jwt.verify(token, publicKey, (err: any) => {
+app.post('/logout', async (req: any, res: any) => {
+  const token = req.headers['cookie'].split('session=')[1];
+  await jwt.verify(token, publicKey, async function (err: any, decoded: any) {
     if (err) {
       res.status(400).json('Unauthorized');
+    } else {
+      let result = await prisma.sessions.findFirst({
+        where: {
+          userId: decoded.data.id,
+          sessionId: decoded.data.session,
+        },
+      });
+      if (result != null) {
+        prisma.sessions.delete({
+          where: { sessionId: decoded.data.session },
+        });
+
+        prisma.sessions.deleteMany({
+          where: {
+            createdAt: {
+              lt: Math.floor(Date.now() / (1000 * 60 * 60) - 2),
+            },
+          },
+        });
+        res.status(200).json('Success');
+      } else {
+        res.status(400).json('Unauthorized');
+      }
+    }
+  });
+});
+
+app.post('/purchase', async (req: any, res: any) => {
+  const token = req.headers['cookie'].split('session=')[1];
+  await jwt.verify(token, publicKey, async function (err: any, decoded: any) {
+    if (err) {
+      res.status(400).json('Unauthorized');
+    } else {
+      let result = await prisma.sessions.findFirst({
+        where: {
+          userId: decoded.data.id,
+          sessionId: decoded.data.session,
+        },
+      });
+      if (result == null) {
+        res.status(400).json('Please login');
+      }
+      if (!req.body.items) {
+        res.status(400).json('No products');
+      } else {
+        const items = req.body.items;
+        items.forEach(async (item: any) => {
+          await prisma.product.update({
+            where: { id: item.productId },
+            data: {
+              id: item.id,
+              amountAvailable: {
+                decrement: item.amountBought,
+              },
+            },
+          });
+        });
+        res.status(200).json('Success');
+      }
     }
   });
 });

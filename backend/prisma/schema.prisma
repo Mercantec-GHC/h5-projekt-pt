@@ -31,4 +31,5 @@ model Product {
 model Sessions {
   userId Int
   sessionId Int @id
+  createdAt Int
 }
