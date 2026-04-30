@@ -26,7 +26,7 @@ const getSessionUsername = (token: string | undefined) => {
 
         const normalizedPayload = payload.replace(/-/g, "+").replace(/_/g, "/");
         const decoded = JSON.parse(atob(normalizedPayload));
-        return "Velkommen " + (decoded?.data?.user ?? null) + "!" as string;
+        return ("Velkommen " + (decoded?.data?.user ?? null) + "!") as string;
     } catch {
         return null;
     }
@@ -48,9 +48,23 @@ const Navbar: React.FunctionComponent = () => {
     }, []);
 
     const handleLogout = () => {
-        cookies.remove("session", { path: "/" });
-        setIsLoggedIn(false);
-        setUsername(null);
+        fetch("http://localhost:4000/logout", {
+            method: "POST",
+            credentials: "include",
+            headers: { "Content-Type": "application/json" },
+        })
+            .then((res) => {
+                if (res.ok) {
+                    cookies.remove("session", { path: "/" });
+                    setIsLoggedIn(false);
+                    setUsername(null);
+                } else {
+                    console.error("Logout failed:", res.statusText);
+                }
+            })
+            .catch((error) => {
+                console.error("Logout failed:", error);
+            });
         router.refresh();
     };
 
@@ -67,11 +81,7 @@ const Navbar: React.FunctionComponent = () => {
                         <FontAwesomeIcon icon={faSearch} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-white/80" />
                         <input type="text" placeholder="Search..." className="absolute left-1/2 h-10 w-full max-w-[400px] -translate-x-1/2 rounded-lg border border-transparent pl-10 shadow-lg focus:outline-none focus:border-[#8FA7FF]" style={{ backgroundColor: "#4965D4" }} />
 
-                        {isMounted && isLoggedIn && username ? (
-                            <div className="absolute left-[calc(50%+220px)] top-1/2 hidden -translate-y-1/2 whitespace-nowrap px-4 py-2 text-lg font-semibold text-white lg:block">
-                                {username}
-                            </div>
-                        ) : null}
+                        {isMounted && isLoggedIn && username ? <div className="absolute left-[calc(50%+220px)] top-1/2 hidden -translate-y-1/2 whitespace-nowrap px-4 py-2 text-lg font-semibold text-white lg:block">{username}</div> : null}
                     </div>
                 </div>
 
