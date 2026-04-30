@@ -7,6 +7,8 @@ services:
     depends_on:
       backend:
         condition: service_healthy
+    networks:
+      - frontend
     ports:
       - "8080:3000"
     
@@ -18,6 +20,8 @@ services:
       - db.env
     volumes: 
       - ./db_data:/var/lib/mysql 
+    networks:
+      - backend
     ports:
       - 3306:3306
     healthcheck:
@@ -35,6 +39,9 @@ services:
     depends_on: 
       database: 
         condition: service_healthy
+    networks:
+      - backend
+      - frontend
     ports:
       - "4000:3000"
     env_file:
@@ -46,13 +53,19 @@ services:
       retries: 3
       start_period: 10s
 
-  messagebroker:
-    image: rabbitmq:management
-    ports:
-      - "5672:5672"  # RabbitMQ port med amqp-protokol
-      - "15672:15672"  # RabbitMQ management UI
-      - "1883:1883"    # MQTT port
-    env_file:
-      - "rabbitmq.env"
+#  messagebroker:
+#    image: rabbitmq:management
+#    ports:
+#      - "5672:5672"  # RabbitMQ port med amqp-protokol
+#      - "15672:15672"  # RabbitMQ management UI
+#      - "1883:1883"    # MQTT port
+#    env_file:
+#      - "rabbitmq.env"
 
 
+networks:
+  frontend:
+    name: frontend
+    
+  backend:
+    name: backend

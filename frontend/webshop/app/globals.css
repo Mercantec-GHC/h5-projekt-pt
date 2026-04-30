@@ -24,3 +24,39 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Toast styles */
+#toast {
+    visibility: visible;
+    pointer-events: none;
+    min-width: 260px;
+    max-width: calc(100% - 64px);
+    color: #fff;
+    text-align: left;
+    border-radius: 12px;
+    padding: 14px 18px;
+    position: fixed;
+    z-index: 9999;
+    right: 30px;
+    bottom: 30px;
+    box-shadow: 0 10px 30px rgba(2, 10, 40, 0.35);
+    transform: translateY(18px);
+    opacity: 0;
+    transition: opacity 220ms ease, transform 260ms cubic-bezier(.2, .8, .2, 1);
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    font-weight: 600;
+}
+
+/* Visible state */
+#toast.show {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+/* Default background */
+.toast-default {
+  background-color: rgba(28, 28, 30, 0.96);
+}
