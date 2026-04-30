@@ -4,7 +4,6 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import cors from 'cors';
 import { prisma } from './lib/prisma';
-import type { Prisma__ProductClient } from './generated/prisma/models';
 
 const app = express();
 app.use(express.json());
