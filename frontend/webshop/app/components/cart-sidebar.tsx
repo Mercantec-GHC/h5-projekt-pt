@@ -59,6 +59,7 @@ const CartSidebar = () => {
     function sendReceiptToServer(data: any) {
         fetch(`http://localhost:4000/purchase`, {
             method: "POST",
+            credentials: "include",
             headers: {
                 "Content-Type": "application/json",
             },
